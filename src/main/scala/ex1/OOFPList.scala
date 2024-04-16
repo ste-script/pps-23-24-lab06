@@ -52,9 +52,13 @@ enum List[A]:
   def length(): Int = foldLeft(0)((b, a) => b + 1)
 
   def zipWithIndex: List[(A, Int)] =
-    foldRight((Nil(), this.length()))((a, b) => (a, b._2 - 1) :: (b._1, b._2))
+    var x = this.length()
+    foldRight(Nil())((a, b) => (a, { x = x - 1; x }) :: b)
 
-  def partition(predicate: A => Boolean): (List[A], List[A]) = ???
+  def partition(predicate: A => Boolean): (List[A], List[A]) =
+    foldRight(Nil(), Nil())((a, b) =>
+      if predicate(a) then (a :: b._1, b._2) else (b._1, a :: b._2)
+    )
   def span(predicate: A => Boolean): (List[A], List[A]) = ???
   def takeRight(n: Int): List[A] = ???
   def collect(predicate: PartialFunction[A, A]): List[A] = ???
@@ -78,8 +82,8 @@ object Test extends App:
   ) // List((1, 10), (2, 10), (3, 10), (4, 10))
   println(reference.length())
   println(reference.zipWithIndex) // List((1, 0), (2, 1), (3, 2), (4, 3))
-  /*println(reference.partition(_ % 2 == 0)) // (List(2, 4), List(1, 3))
-  println(reference.span(_ % 2 != 0)) // (List(1), List(2, 3, 4))
+  println(reference.partition(_ % 2 == 0)) // (List(2, 4), List(1, 3))
+  /*println(reference.span(_ % 2 != 0)) // (List(1), List(2, 3, 4))
   println(reference.span(_ < 3)) // (List(1, 2), List(3, 4))
   println(reference.reduce(_ + _)) // 10
   println(List(10).reduce(_ + _)) // 10
