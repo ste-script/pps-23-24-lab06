@@ -59,9 +59,28 @@ enum List[A]:
     foldRight(Nil(), Nil())((a, b) =>
       if predicate(a) then (a :: b._1, b._2) else (b._1, a :: b._2)
     )
-  def span(predicate: A => Boolean): (List[A], List[A]) = ???
-  def takeRight(n: Int): List[A] = ???
-  def collect(predicate: PartialFunction[A, A]): List[A] = ???
+
+  def reverse: List[A] = foldLeft(Nil())((b, a) => a :: b)
+
+  def span(predicate: A => Boolean): (List[A], List[A]) =
+    var splitted: Boolean = false
+    val x = foldLeft(Nil(): List[A], Nil(): List[A])((b, a) =>
+      if predicate(a) || !splitted then { splitted = true; (a :: b._1, b._2) }
+      else (b._1, a :: b._2)
+    )
+    (x._1.reverse, x._2.reverse)
+
+  def takeRight(n: Int): List[A] =
+    var counter = this.length() + 1
+    foldRight(Nil(): List[A])((a, b) =>
+      if counter < n then b
+      else { counter = counter - 1; a :: b }
+    )
+
+  def collect(predicate: PartialFunction[A, A]): List[A] =
+    foldRight(Nil(): List[A])((a, b) =>
+      if predicate.isDefinedAt(a) then predicate(a) :: b else b
+    )
 // Factories
 object List:
 
@@ -83,10 +102,9 @@ object Test extends App:
   println(reference.length())
   println(reference.zipWithIndex) // List((1, 0), (2, 1), (3, 2), (4, 3))
   println(reference.partition(_ % 2 == 0)) // (List(2, 4), List(1, 3))
-  /*println(reference.span(_ % 2 != 0)) // (List(1), List(2, 3, 4))
+  println(reference.span(_ % 2 != 0)) // (List(1,3), List(2, 4))
   println(reference.span(_ < 3)) // (List(1, 2), List(3, 4))
+  println(reference.takeRight(3)) // List(2, 3, 4)
   println(reference.reduce(_ + _)) // 10
   println(List(10).reduce(_ + _)) // 10
-  println(reference.takeRight(3)) // List(2, 3, 4)
   println(reference.collect { case x if x % 2 == 0 => x + 1 }) // List(3, 5)
-   */
