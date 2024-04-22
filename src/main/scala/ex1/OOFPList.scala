@@ -71,11 +71,11 @@ enum List[A]:
     (x._1.reverse, x._2.reverse)
 
   def takeRight(n: Int): List[A] =
-    var counter = this.length() + 1
-    foldRight(Nil(): List[A])((a, b) =>
-      if counter < n then b
-      else { counter = counter - 1; a :: b }
-    )
+    foldRight(Nil(): List[A], n)((element, result) =>
+      result match
+        case (res, 0) => result
+        case (res, n) => (element :: result._1, n - 1)
+    )._1
 
   def collect(predicate: PartialFunction[A, A]): List[A] =
     foldRight(Nil(): List[A])((a, b) =>
